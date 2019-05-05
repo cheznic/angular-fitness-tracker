@@ -1,0 +1,21 @@
+<section>
+  <form fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="4px" [formGroup]="signupForm"
+    (ngSubmit)="onSubmit()">
+    <mat-form-field>
+      <input type="email" matInput placeholder="Email" formControlName="email">
+      <mat-error>Must be a valid email.</mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <input type="password" matInput placeholder="Password" formControlName="password">
+      <mat-error>Password must be at least 6 characters</mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <input matInput placeholder="You birthday" [matDatepicker]="picker" [max]="maxDate" formControlName="birthdate">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+      <mat-error>You must be 18 years or older.</mat-error>
+    </mat-form-field>
+    <mat-checkbox formControlName="agree" color="primary">I Agree to Terms and Conditions</mat-checkbox>
+    <button mat-raised-button color="primary" type="submit" [disabled]="signupForm.invalid">Sign Up</button>
+  </form>
+</section>

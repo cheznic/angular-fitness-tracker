@@ -1,0 +1,10 @@
+.current-training {
+   height: 100%;
+   padding: 30px;
+}
+
+button {
+   margin: 16px;
+   height: 70px;
+   width: 70px;
+}
