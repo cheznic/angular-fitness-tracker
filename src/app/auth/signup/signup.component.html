@@ -16,7 +16,8 @@
       <mat-error>You must be 18 years or older.</mat-error>
     </mat-form-field>
     <mat-checkbox formControlName="agree" color="primary">I Agree to Terms and Conditions</mat-checkbox>
-    <button *ngIf="!(uiService.spinner$ | async)" mat-raised-button color="primary" type="submit" [disabled]="signupForm.invalid">Sign Up</button>
-    <mat-spinner *ngIf="uiService.spinner$ | async"></mat-spinner>
+    <button *ngIf="!(spinner$ | async)" mat-raised-button color="primary" type="submit"
+      [disabled]="signupForm.invalid">Sign Up</button>
+    <mat-spinner *ngIf="spinner$ | async"></mat-spinner>
   </form>
 </section>

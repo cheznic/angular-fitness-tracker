@@ -14,9 +14,8 @@ import { Exercise } from '../exercise.model';
 })
 export class CurrentTrainingComponent implements OnInit, OnDestroy {
   private selectedExercise: Exercise;
-  // private lapsedMilliseconds: number = 0;
   private frequency: number;
-  private subscription: Subscription;
+  private timerSub: Subscription;
   private started: boolean = false;
   private completed: boolean = false;
 
@@ -38,10 +37,7 @@ export class CurrentTrainingComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
-    }
+    this.cancelTimer();
   }
 
   onCancel() {
@@ -94,21 +90,17 @@ export class CurrentTrainingComponent implements OnInit, OnDestroy {
   private pauseTimer() {
     this.started = false;
     this.timerButtonText = "Resume";
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
-    }
+    this.cancelTimer();
   }
 
   private startTimer() {
     this.started = true;
     this.timerButtonText = "Pause";
-    this.subscription = interval(this.frequency).pipe(
+    this.timerSub = interval(this.frequency).pipe(
       take(100 - this.progress)
     ).subscribe(x => {
       this.progress++;
       this.progressText = Math.ceil(this.progress).toString();
-      // this.lapsedMilliseconds += this.frequency;
       if (Math.ceil(this.progress) > 99) {
         this.timerButtonText = "Reset";
         this.cancelButtonText = "Exit";
@@ -116,19 +108,21 @@ export class CurrentTrainingComponent implements OnInit, OnDestroy {
         this.completed = true;
         this.started = false;
       }
+    });
+  }
+
+  private cancelTimer() {
+    if (this.timerSub) {
+      this.timerSub.unsubscribe();
+      this.timerSub = undefined;
     }
-    );
   }
 
   private initTimer() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
-    }
+    this.cancelTimer();
     const milliseconds = this.selectedExercise.duration * 1000;
     this.frequency = milliseconds / 100;
     this.progress = 0;
-    // this.lapsedMilliseconds = 0;
     this.progressText = '0';
     this.started = false;
     this.timerButtonText = "Start";

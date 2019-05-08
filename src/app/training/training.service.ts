@@ -21,7 +21,7 @@ export class TrainingService {
       private db: AngularFirestore,
       private trainingHistoryService: TrainingHistoryService
    ) {
-      this.fetchAvailableExercises();
+      this.observeExerciseList();
       this.populateExerciseList();
    }
 
@@ -30,7 +30,7 @@ export class TrainingService {
       this.selectedExercise.next({ ...this.currentExercise });
    }
 
-   fetchAvailableExercises() {
+   observeExerciseList() {
       this.exercises$ = this.db
          .collection<Exercise>('availableExercises')
          .snapshotChanges()
@@ -44,7 +44,6 @@ export class TrainingService {
                });
             })
          );
-
    }
 
    completeExercise() {

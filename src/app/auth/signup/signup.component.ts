@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators, NgForm } from '@angular/forms';
+import { Observable } from 'rxjs';
+import { Store } from '@ngrx/store';
 
 import { AuthService } from '../auth.service';
-import { UIService } from 'src/app/shared/ui.service';
+import * as fromRoot from '../../app.reducer';
 
 @Component({
   selector: 'app-signup',
@@ -12,13 +14,18 @@ import { UIService } from 'src/app/shared/ui.service';
 export class SignupComponent implements OnInit {
 
   maxDate: Date;
-
   signupForm: FormGroup;
+  spinner$: Observable<boolean>;
 
   constructor(
     private authService: AuthService,
-    public uiService: UIService
+    private store: Store<fromRoot.State>
   ) { }
+
+  private initSpinner() {
+    // set 'is loading' state to the spinner$ observable
+    this.spinner$ = this.store.select(fromRoot.getIsLoading);
+  }
 
   ngOnInit() {
     this.maxDate = new Date();
@@ -30,6 +37,8 @@ export class SignupComponent implements OnInit {
       birthdate: new FormControl('', { validators: [Validators.required, Validators.max(this.maxDate.valueOf())] }),
       agree: new FormControl('', { validators: [Validators.required, Validators.requiredTrue] })
     });
+
+    this.initSpinner();
   }
 
   onSubmit() {

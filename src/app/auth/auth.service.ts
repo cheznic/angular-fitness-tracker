@@ -5,6 +5,10 @@ import { Subject } from 'rxjs';
 
 import { AuthData } from './auth-data.model';
 import { UIService } from '../shared/ui.service';
+import { Store } from '@ngrx/store';
+
+import * as fromRoot from '../app.reducer';
+import * as UI from '../shared/ui.actions';
 
 @Injectable()
 export class AuthService {
@@ -16,7 +20,8 @@ export class AuthService {
    constructor(
       private router: Router,
       private afAuth: AngularFireAuth,
-      private uiService: UIService
+      private uiService: UIService,
+      private store: Store<fromRoot.State>
    ) { }
 
    initAuthListener() {
@@ -34,25 +39,29 @@ export class AuthService {
    }
 
    registerUser(authData: AuthData) {
-      this.uiService.startSpinner();
+      this.store.dispatch(new UI.StartLoading());
       this.afAuth.auth.createUserWithEmailAndPassword(authData.email, authData.password)
-         .then(result => this.uiService.stopSpinner())
+         .then(result => {
+            this.store.dispatch(new UI.StopLoading());
+         })
          .catch(err => {
             console.log(err);
             this.uiService.showError(err);
-            this.uiService.stopSpinner();
+            this.store.dispatch(new UI.StopLoading());
          });
    }
 
    login(authData: AuthData) {
-      this.uiService.startSpinner();
+      this.store.dispatch(new UI.StartLoading());
       this.afAuth.auth
          .signInWithEmailAndPassword(authData.email, authData.password)
-         .then(result => this.uiService.stopSpinner())
+         .then(result => {
+            this.store.dispatch(new UI.StopLoading());
+         })
          .catch(err => {
             console.log(err);
             this.uiService.showError(err);
-            this.uiService.stopSpinner();
+            this.store.dispatch(new UI.StopLoading());
          });
    }
 

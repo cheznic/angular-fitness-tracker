@@ -9,7 +9,8 @@
       <input type="password" matInput placeholder="Password" formControlName="password">
       <mat-error>Password is required.</mat-error>
     </mat-form-field>
-    <button *ngIf="!(uiService.spinner$ | async)" mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid">Login</button>
-    <mat-spinner *ngIf="uiService.spinner$ | async"></mat-spinner>
+    <button *ngIf="!(spinner$ | async)" mat-raised-button color="primary" type="submit"
+      [disabled]="loginForm.invalid">Login</button>
+    <mat-spinner *ngIf="spinner$ | async"></mat-spinner>
   </form>
 </section>
