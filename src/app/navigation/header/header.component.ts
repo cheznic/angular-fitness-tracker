@@ -19,7 +19,7 @@ export class HeaderComponent implements OnInit {
   constructor(private authService: AuthService) { }
 
   ngOnInit() {
-    this.isAuth$ = this.authService.authChange$;
+    this.isAuth$ = this.authService.authenticated$;
   }
 
   onClickMenuToggle() {

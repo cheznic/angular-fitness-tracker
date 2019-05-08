@@ -1,58 +1,82 @@
-import { Exercise } from './exercise.model';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Subject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { AngularFirestore } from '@angular/fire/firestore';
 
+import { Exercise } from './exercise.model';
+import { TrainingHistoryService } from './training-history.service';
+
+@Injectable()
 export class TrainingService {
 
-   private runningExercise: Exercise;
-   private exercisesLog: Exercise[] = [];
-   private subject: BehaviorSubject<Exercise[]> = new BehaviorSubject<Exercise[]>(availableExercises.slice());
+   private currentExercise: Exercise;
+   private exerciseList: Exercise[] = [];
 
-   exercises$ = this.subject.asObservable();
-   selectedExercise = new Subject<Exercise>();
+   exercises$: Observable<Exercise[]>;
+   exercisesHistory$: Observable<Exercise[]>;
+   private selectedExercise = new Subject<Exercise>();
+   currentExercise$ = this.selectedExercise.asObservable();
 
-   select(exerciseId: string) {
-      this.runningExercise = availableExercises.find(ex => ex.id === exerciseId);
-      this.selectedExercise.next({ ...this.runningExercise });
+   constructor(
+      private db: AngularFirestore,
+      private trainingHistoryService: TrainingHistoryService
+   ) {
+      this.fetchAvailableExercises();
+      this.populateExerciseList();
    }
 
-   complete() {
-      this.exercisesLog.push({
-         ...this.runningExercise,
+   selectExercise(exerciseId: string) {
+      this.currentExercise = this.exerciseList.find(ex => ex.id === exerciseId);
+      this.selectedExercise.next({ ...this.currentExercise });
+   }
+
+   fetchAvailableExercises() {
+      this.exercises$ = this.db
+         .collection<Exercise>('availableExercises')
+         .snapshotChanges()
+         .pipe(
+            map(docs => {
+               return docs.map(doc => {
+                  return {
+                     id: doc.payload.doc.id,
+                     ...doc.payload.doc.data()
+                  };
+               });
+            })
+         );
+
+   }
+
+   completeExercise() {
+      this.trainingHistoryService.addToTrainingHistory({
+         ...this.currentExercise,
          date: new Date(),
          state: "completed"
       });
-      this.runningExercise = null;
+      this.currentExercise = null;
       this.selectedExercise.next(null);
    }
 
-   cancel(progress: number) {
-      this.exercisesLog.push({
-         ...this.runningExercise,
-         duration: this.runningExercise.duration * (progress / 100),
-         calories: this.runningExercise.calories * (progress / 100),
+   cancelExercise(progress: number) {
+      this.trainingHistoryService.addToTrainingHistory({
+         ...this.currentExercise,
+         duration: this.currentExercise.duration * (progress / 100),
+         calories: this.currentExercise.calories * (progress / 100),
          date: new Date(),
          state: "canceled"
       });
-      this.runningExercise = null;
+      this.currentExercise = null;
       this.selectedExercise.next(null);
    }
 
-   getExerciseLog() {
-      return this.exercisesLog.slice();
+   private populateExerciseList() {
+      this.exercises$.subscribe((exercises: Exercise[]) => {
+         this.exerciseList = exercises;
+      });
    }
 
-   getRunningExercise(): Exercise {
-      return { ...this.runningExercise };
+   getCurrentExercise(): Exercise {
+      return { ...this.currentExercise };
    }
 }
-
-
-const availableExercises: Exercise[] = [
-   { id: 'crunches', name: 'Crunches', duration: 120, calories: 10 },
-   { id: 'burpies', name: 'Burpies', duration: 90, calories: 15 },
-   { id: 'plank', name: 'Plank', duration: 80, calories: 8 },
-   { id: 'sidePlank', name: 'Side Plank', duration: 30, calories: 6 },
-   { id: 'dumbellCurl', name: 'Dumbell Curl', duration: 40, calories: 8 },
-   { id: 'dumbellMilitaryPress', name: 'Dumbell Military Press', duration: 40, calories: 8 },
-];
 

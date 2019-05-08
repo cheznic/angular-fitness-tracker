@@ -28,11 +28,11 @@ export class CurrentTrainingComponent implements OnInit, OnDestroy {
 
   constructor(
     private dialog: MatDialog,
-    private trainingService: TrainingService
+    private trainingService: TrainingService,
   ) { }
 
   ngOnInit() {
-    this.selectedExercise = this.trainingService.getRunningExercise();
+    this.selectedExercise = this.trainingService.getCurrentExercise();
     this.exerciseName = this.selectedExercise.name;
     this.initTimer();
   }
@@ -46,7 +46,7 @@ export class CurrentTrainingComponent implements OnInit, OnDestroy {
 
   onCancel() {
     if (this.completed) {
-      this.trainingService.cancel(this.progress);
+      this.trainingService.completeExercise();
     } else {
       this.pauseTimer();
       const dialogRef = this.dialog.open(StopTrainingComponent, {
@@ -57,7 +57,7 @@ export class CurrentTrainingComponent implements OnInit, OnDestroy {
 
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
-          this.trainingService.cancel(this.progress);
+          this.trainingService.cancelExercise(this.progress);
         }
       });
     }
@@ -112,7 +112,7 @@ export class CurrentTrainingComponent implements OnInit, OnDestroy {
       if (Math.ceil(this.progress) > 99) {
         this.timerButtonText = "Reset";
         this.cancelButtonText = "Exit";
-        this.trainingService.complete();
+        this.trainingService.completeExercise();
         this.completed = true;
         this.started = false;
       }
