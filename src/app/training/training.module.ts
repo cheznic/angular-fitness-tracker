@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+
 import { SharedModule } from '../shared/shared.module';
 import { TrainingComponent } from '../training/training.component';
 import { CurrentTrainingComponent } from '../training/current-training/current-training.component';
@@ -19,6 +20,11 @@ import { TrainingRoutingModule } from './training-routing.module';
       SharedModule,
       TrainingRoutingModule
    ],
-   entryComponents: [StopTrainingComponent]
+   exports: [
+      TrainingRoutingModule
+   ],
+   entryComponents: [
+      StopTrainingComponent
+   ]
 })
 export class TrainingModule { }

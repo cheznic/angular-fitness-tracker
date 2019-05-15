@@ -1,10 +1,10 @@
 <section class="current-training" fxLayout="column" fxLayoutAlign="center center">
-  <h2>{{ exerciseName }}</h2>
+  <h2>{{ exercise.name }}</h2>
   <mat-progress-spinner mode="determinate" [value]="progress"></mat-progress-spinner>
   <h1>{{ progressText }}%</h1>
   <p>Don't give up!</p>
-    <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="16px">
-      <button mat-fab color="accent" (click)="onButtonClick()">{{ timerButtonText }}</button>
-      <button mat-fab color="none" (click)="onCancel()">{{ cancelButtonText }}</button>
-    </div>
+  <div fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="16px">
+    <button mat-fab color="accent" (click)="onButtonClick()">{{ timerButtonText }}</button>
+    <button mat-fab color="none" (click)="onCancel()">{{ cancelButtonText }}</button>
+  </div>
 </section>

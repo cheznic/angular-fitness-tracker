@@ -22,17 +22,12 @@ export class LoginComponent implements OnInit {
     public store: Store<fromRoot.State>
   ) { }
 
-  private initSpinner() {
-    // set 'is loading' state to the spinner$ observable
-    this.spinner$ = this.store.select(fromRoot.getIsLoading)
- }
-
   ngOnInit() {
     this.loginForm = new FormGroup({
       email: new FormControl('', { validators: [Validators.required, Validators.email] }),
       password: new FormControl('', { validators: [Validators.required, Validators.minLength(6)] })
     });
-    this.initSpinner();
+    this.spinner$ = this.store.select(fromRoot.getIsLoading);
   }
 
   onSubmit() {

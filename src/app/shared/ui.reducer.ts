@@ -1,10 +1,4 @@
-import { Action } from '@ngrx/store';
-
-import {
-   UIActions,
-   START_LOADING,
-   STOP_LOADING
-} from './ui.actions';
+import { UIActionTypes, UIActions } from './ui.actions';
 
 export interface State {
    isLoading: boolean;
@@ -14,13 +8,20 @@ const initialState: State = {
    isLoading: false
 };
 
-export function uiReducer(state: State = initialState, action: UIActions) {
+export function uiReducer(state: State = initialState, action: UIActionTypes) {
+
+   for(let act in UIActions) {
+      if (act == action.constructor.name) {
+         console.log(`REDUCER: ${action.type}`);
+      }   
+   }
+
    switch (action.type) {
-      case START_LOADING:
+      case UIActions.START_LOADING:
          return {
             isLoading: true
          };
-      case STOP_LOADING:
+      case UIActions.STOP_LOADING:
          return {
             isLoading: false
          };

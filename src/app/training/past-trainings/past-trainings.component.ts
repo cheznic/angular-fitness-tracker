@@ -1,34 +1,45 @@
-import { Component, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
 import { MatTableDataSource, MatSort, MatPaginator } from '@angular/material';
+import { Subscription, Observable } from 'rxjs';
+import { delay } from 'rxjs/operators';
+import { Store, select } from '@ngrx/store';
 
 import { Exercise } from '../exercise.model';
-import { TrainingHistoryService } from '../training-history.service';
-import { Subscription } from 'rxjs';
+import * as fromRoot from '../../app.reducer';
+import { RequestTrainingHistory } from '../training.actions';
 
 @Component({
   selector: 'app-past-trainings',
   templateUrl: './past-trainings.component.html',
   styleUrls: ['./past-trainings.component.css']
 })
-export class PastTrainingsComponent implements AfterViewInit, OnDestroy {
+export class PastTrainingsComponent implements AfterViewInit, OnDestroy, OnInit {
 
-  // displayedColumns = ['date', 'name', 'duration', 'calories', 'state'];
   displayedColumns = ['date', 'name', 'calories', 'state'];
-  dataSource: MatTableDataSource<Exercise>;
-  private subscription: Subscription;
+  dataSource: MatTableDataSource<Exercise> = new MatTableDataSource();
+  
+  private exerciseHistory$: Observable<Exercise[]>;
+  private historySub: Subscription;
 
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   constructor(
-    private trainingHistoryService: TrainingHistoryService
+    private store: Store<fromRoot.State>
   ) { }
 
+  ngOnInit() {
+    this.exerciseHistory$ = this.store.pipe(
+      select(fromRoot.getExerciseHistory)
+    );
+    this.store.dispatch(new RequestTrainingHistory());
+  }
+  
   ngAfterViewInit() {
-    this.subscription = this.trainingHistoryService
-      .trainingHistory$
-      .subscribe(history => {
-        this.dataSource = new MatTableDataSource(history);
+    this.historySub = this.exerciseHistory$.pipe(
+      delay(0)
+    ).subscribe(history => {
+        this.dataSource.data = history;
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
       });
@@ -39,9 +50,9 @@ export class PastTrainingsComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
+    if (!!this.historySub) {
+      this.historySub.unsubscribe();
+      this.historySub = undefined;
     }
   }
 }

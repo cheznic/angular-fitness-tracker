@@ -12,7 +12,9 @@ const routes: Routes = [
    imports: [
       RouterModule.forChild(routes)
    ],
-   exports: [RouterModule],
+   exports: [
+      RouterModule
+   ],
    providers: []
 })
-export class AuthRoutingModule {}
+export class AuthRoutingModule { }

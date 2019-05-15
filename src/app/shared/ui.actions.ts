@@ -1,15 +1,25 @@
 import { Action } from '@ngrx/store';
 
-export const START_LOADING = '[UI] START_LOADING';
-export const STOP_LOADING = '[UI] STOP_LOADING';
+export enum UIActions {
+   START_LOADING = '[UI] START_LOADING',
+   STOP_LOADING = '[UI] STOP_LOADING'
+}
 
 export class StartLoading implements Action {
-   readonly type = START_LOADING;
+   readonly type = UIActions.START_LOADING;
+
+   constructor() {
+      console.log(`ACTION: ${this.type}`);
+   }
 }
 export class StopLoading implements Action {
-   readonly type = STOP_LOADING;
+   readonly type = UIActions.STOP_LOADING;
+   
+   constructor() {
+      console.log(`ACTION: ${this.type}`);
+   }
 }
 
-export type UIActions =
+export type UIActionTypes =
    StartLoading |
    StopLoading;

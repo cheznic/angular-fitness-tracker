@@ -21,7 +21,7 @@ export class UIService {
          });
          return;
       }
-      this.snackbar.open("Unexpected error.", null, {
+    this.snackbar.open('Unexpected error, check network and try again.', null, {
          duration: 3000
       });
    }

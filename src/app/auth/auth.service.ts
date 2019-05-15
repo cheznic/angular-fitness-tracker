@@ -1,21 +1,20 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { AngularFireAuth } from '@angular/fire/auth';
-import { Subject } from 'rxjs';
+import { Store } from '@ngrx/store';
 
 import { AuthData } from './auth-data.model';
 import { UIService } from '../shared/ui.service';
-import { Store } from '@ngrx/store';
 
 import * as fromRoot from '../app.reducer';
 import * as UI from '../shared/ui.actions';
+import * as Auth from './auth.actions';
+import { Subscription } from 'rxjs';
 
 @Injectable()
 export class AuthService {
-   private subject = new Subject<boolean>();
-   private isAuthenticated = false;
 
-   authenticated$ = this.subject.asObservable()
+   private sub: Subscription;
 
    constructor(
       private router: Router,
@@ -25,14 +24,12 @@ export class AuthService {
    ) { }
 
    initAuthListener() {
-      this.afAuth.authState.subscribe(user => {
+      this.sub = this.afAuth.authState.subscribe(user => {
          if (user) {
-            this.subject.next(true);
-            this.isAuthenticated = true;
+            this.store.dispatch(new Auth.SetAuthenticated());
             this.router.navigate(['/training']);
          } else {
-            this.subject.next(false);
-            this.isAuthenticated = false;
+            this.store.dispatch(new Auth.SetUnauthenticated());
             this.router.navigate(['/login']);
          }
       });
@@ -66,10 +63,7 @@ export class AuthService {
    }
 
    logout() {
+      // this.sub.unsubscribe();
       this.afAuth.auth.signOut();
-   }
-
-   isAuth() {
-      return this.isAuthenticated;
    }
 }
