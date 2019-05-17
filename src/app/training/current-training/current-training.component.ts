@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { interval, Subscription, Observable, Subscriber } from 'rxjs';
-import { take, map, tap } from 'rxjs/operators';
+import { take, map, tap, filter } from 'rxjs/operators';
 import { Store, select } from '@ngrx/store';
 import { MatDialog } from '@angular/material';
 
@@ -21,7 +21,6 @@ export class CurrentTrainingComponent implements OnInit, OnDestroy {
   private frequency: number;
   private timerSub: Subscription;
   private started: boolean = false;
-  private completed: boolean = false;
   private exerciseSub: Subscription;
 
   progress = 0;
@@ -39,9 +38,10 @@ export class CurrentTrainingComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.exerciseSub = this.store
       .select(fromRoot.getActiveExercise)
+      .pipe(filter(exercise => !!exercise))
       .subscribe(exercise => {
         this.exercise = exercise;
-        () => this.initTimer();
+        this.initTimer();
       });
   }
 
@@ -85,7 +85,6 @@ export class CurrentTrainingComponent implements OnInit, OnDestroy {
     // do Restart
     if (Math.ceil(this.progress) > 99) {
       this.initTimer();
-      this.completed = false;
       this.timerButtonText = "Pause";
       this.cancelButtonText = "Cancel"
       return;
@@ -121,7 +120,6 @@ export class CurrentTrainingComponent implements OnInit, OnDestroy {
             progress: this.progress
           })
         );
-        this.completed = true;
         this.started = false;
       }
     });
