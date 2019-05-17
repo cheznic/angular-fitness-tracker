@@ -1,45 +1,55 @@
 import { Injectable } from '@angular/core';
-// import { Subject } from 'rxjs';
+import { Observable } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
-// import { AngularFirestore } from '@angular/fire/firestore';
-// import { Exercise } from './exercise.model';
+import { AngularFirestore } from '@angular/fire/firestore';
+import { Exercise } from './exercise.model';
+import { UIService } from '../shared/ui.service';
 
 @Injectable()
 export class TrainingService {
 
-   // private currentExercise: Exercise;
-   // private exerciseList: Exercise[] = [];
-
-   // private selectedExercise = new Subject<Exercise>();
-   // currentExercise$ = this.selectedExercise.asObservable();
-
    constructor(
-      // private db: AngularFirestore
+      private db: AngularFirestore,
+      private uiService: UIService
    ) { }
 
-   // selectExercise(exerciseId: string) {
-   //    this.currentExercise = this.exerciseList.find(ex => ex.id === exerciseId);
-   //    this.selectedExercise.next({ ...this.currentExercise });
-   // }
+   exercisesList$: Observable<Exercise[]> = this.db
+      .collection<Exercise>('availableExercises')
+      .snapshotChanges()
+      .pipe(
+         map(docs => {
+            return docs.map(doc => {
+               return {
+                  ...doc.payload.doc.data(),
+                  id: doc.payload.doc.id,
+               };
+            });
+         }),
+         catchError((err, caught) => {
+            console.log(err);
+            this.uiService.showError('Fetching exercises failed, please try again later');
+            return caught;
+         })
+      );
 
-   // completeExercise() {
-   //    this.addToTrainingHistory(this.currentExercise);
-   //    this.currentExercise = null;
-   //    this.selectedExercise.next(null);
-   // }
-
-   // cancelExercise(progress: number) {
-   //    this.addToTrainingHistory(this.currentExercise);
-   //    this.currentExercise = null;
-   //    this.selectedExercise.next(null);
-   // }
-
-   // addToTrainingHistory(exercise: Exercise) {
-   //    this.db.collection('exerciseHistory').add({ ...exercise });
-   // }
-
-   // getCurrentExercise(): Exercise {
-   //    return { ...this.currentExercise };
-   // }
+   exerciseHistory$: Observable<Exercise[]> = this.db
+      .collection<Exercise>('exerciseHistory')
+      .snapshotChanges()
+      .pipe(
+         map(docs => {
+            return docs.map(doc => {
+               return {
+                  ...doc.payload.doc.data(),
+                  id: doc.payload.doc.id,
+               };
+            });
+         }),
+         catchError((err, caught) => {
+            console.log(err);
+            this.uiService.showError('Fetching training history failed, please try again later');
+            return caught;
+         })
+      );
 }
 

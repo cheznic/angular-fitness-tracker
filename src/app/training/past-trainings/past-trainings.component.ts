@@ -1,12 +1,14 @@
 import { Component, ViewChild, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
 import { MatTableDataSource, MatSort, MatPaginator } from '@angular/material';
-import { Subscription, Observable } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { delay, take } from 'rxjs/operators';
 import { Store, select } from '@ngrx/store';
 
+import { TrainingService } from '../training.service';
 import { Exercise } from '../exercise.model';
 import * as fromRoot from '../../app.reducer';
-import { RequestTrainingHistory } from '../training.actions';
+import { TrainingHistoryLoaded } from '../training.actions';
+import { UnSub } from '../../shared/unsub';
 
 @Component({
   selector: 'app-past-trainings',
@@ -14,35 +16,43 @@ import { RequestTrainingHistory } from '../training.actions';
   styleUrls: ['./past-trainings.component.css']
 })
 export class PastTrainingsComponent implements AfterViewInit, OnDestroy, OnInit {
-
+  private subs = new UnSub();
   displayedColumns = ['date', 'name', 'calories', 'state'];
   dataSource: MatTableDataSource<Exercise> = new MatTableDataSource();
-  
-  private exerciseHistory$: Observable<Exercise[]>;
-  private historySub: Subscription;
+
+  private exerciseHistory$: Observable<Exercise[]> = this.store.pipe(
+    select(fromRoot.getExerciseHistory)
+  );
 
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   constructor(
+    public trainingService: TrainingService,
     private store: Store<fromRoot.State>
   ) { }
 
   ngOnInit() {
-    this.exerciseHistory$ = this.store.pipe(
-      select(fromRoot.getExerciseHistory)
+    this.subs.add(this.trainingService.exerciseHistory$
+      .pipe(
+        take(1)
+      ).subscribe((exercises: Exercise[]) => {
+        this.store.dispatch(new TrainingHistoryLoaded(exercises));
+      })
     );
-    this.store.dispatch(new RequestTrainingHistory());
   }
-  
+
   ngAfterViewInit() {
-    this.historySub = this.exerciseHistory$.pipe(
-      delay(0)
-    ).subscribe(history => {
+    this.subs.add(this.exerciseHistory$
+      .pipe(
+        delay(0)
+      ).subscribe(history => {
+        this.dataSource.data = [];
         this.dataSource.data = history;
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
-      });
+      })
+    );
   }
 
   doFilter(filterValue: string) {
@@ -50,9 +60,6 @@ export class PastTrainingsComponent implements AfterViewInit, OnDestroy, OnInit 
   }
 
   ngOnDestroy() {
-    if (!!this.historySub) {
-      this.historySub.unsubscribe();
-      this.historySub = undefined;
-    }
+    this.subs.unsub();
   }
 }
