@@ -1,18 +1,21 @@
-import { Subscription, of } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 export class UnSub {
-  private subscriptions: Subscription[] = [];
+  private subs: Subscription[] = [];
 
-  add(subscription: Subscription) {
-    this.subscriptions.push(subscription);
+  add(sub: Subscription) {
+    this.subs.push(sub);
   }
 
   unsub() {
-    this.subscriptions.forEach(sub => {
-      if (!!sub) {
-        sub.unsubscribe();
-      }
-    });
-    this.subscriptions = [];
+    this.subs
+      .filter(sub => !!sub && !sub.closed)
+      .forEach(sub => {
+        try { sub.unsubscribe(); }
+        catch (err) {
+          console.error(err);
+        }
+      });
+    this.subs = [];
   }
 }
