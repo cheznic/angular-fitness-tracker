@@ -33,18 +33,13 @@ export function trainingReducer(state: State = initialState, action: TrainingAct
       case TrainingActions.ExerciseListLoaded:
          return {
             ...state,
-            exerciseList: action.payload
-         };
-
-      case TrainingActions.RequestTrainingHistory:
-         return {
-            ...state
+            exerciseList: [...action.payload]
          };
 
       case TrainingActions.TrainingHistoryLoaded:
          return {
             ...state,
-            exerciseHistory: action.payload
+            exerciseHistory: [...action.payload]
          };
 
       case TrainingActions.SelectExercise:

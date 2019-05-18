@@ -11,6 +11,7 @@ import * as fromRoot from '../app.reducer';
 import * as UI from '../shared/ui.actions';
 import * as Auth from './auth.actions';
 import { takeUntil } from 'rxjs/operators';
+import { TrainingService } from '../training/training.service';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
       private afAuth: AngularFireAuth,
       private uiService: UIService,
       private store: Store<fromRoot.State>,
+      private trainingService: TrainingService
    ) { }
 
    initAuthListener() {
@@ -30,9 +32,11 @@ export class AuthService {
          .subscribe(auth => {
             if (auth) {
                this.store.dispatch(new Auth.SetAuthenticated());
+               this.trainingService.initTrainingHistory();
                this.router.navigate(['/training']);
             } else {
                this.store.dispatch(new Auth.SetUnauthenticated());
+               this.trainingService.unSub();
                this.router.navigate(['/login']);
             }
          });

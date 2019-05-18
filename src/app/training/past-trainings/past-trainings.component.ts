@@ -1,13 +1,12 @@
 import { Component, ViewChild, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
 import { MatTableDataSource, MatSort, MatPaginator } from '@angular/material';
 import { Observable } from 'rxjs';
-import { delay, take } from 'rxjs/operators';
+import { delay, tap, filter } from 'rxjs/operators';
 import { Store, select } from '@ngrx/store';
 
 import { TrainingService } from '../training.service';
 import { Exercise } from '../exercise.model';
 import * as fromRoot from '../../app.reducer';
-import { TrainingHistoryLoaded } from '../training.actions';
 import { UnSub } from '../../shared/unsub';
 
 @Component({
@@ -18,9 +17,9 @@ import { UnSub } from '../../shared/unsub';
 export class PastTrainingsComponent implements AfterViewInit, OnDestroy, OnInit {
   private subs = new UnSub();
   displayedColumns = ['date', 'name', 'calories', 'state'];
-  dataSource: MatTableDataSource<Exercise> = new MatTableDataSource();
+  dataSource: MatTableDataSource<Exercise> = new MatTableDataSource<Exercise>();
 
-  private exerciseHistory$: Observable<Exercise[]> = this.store.pipe(
+  private history$: Observable<Exercise[]> = this.store.pipe(
     select(fromRoot.getExerciseHistory)
   );
 
@@ -33,25 +32,20 @@ export class PastTrainingsComponent implements AfterViewInit, OnDestroy, OnInit 
   ) { }
 
   ngOnInit() {
-    this.subs.add(this.trainingService.exerciseHistory$
-      .pipe(
-        take(1)
-      ).subscribe((exercises: Exercise[]) => {
-        this.store.dispatch(new TrainingHistoryLoaded(exercises));
-      })
-    );
   }
 
   ngAfterViewInit() {
-    this.subs.add(this.exerciseHistory$
-      .pipe(
-        delay(0)
-      ).subscribe(history => {
-        this.dataSource.data = [];
-        this.dataSource.data = history;
-        this.dataSource.sort = this.sort;
-        this.dataSource.paginator = this.paginator;
-      })
+    this.subs.add(
+      this.history$
+        .pipe(
+          delay(0),
+          filter(history => !!history)
+        )
+        .subscribe((history: Exercise[]) => {
+          this.dataSource.data = history;
+          this.dataSource.sort = this.sort;
+          this.dataSource.paginator = this.paginator;
+        })
     );
   }
 

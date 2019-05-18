@@ -4,7 +4,6 @@ import { Exercise } from './exercise.model';
 export enum TrainingActions {
    RequestExerciseList = '[Training] Request Exercise List',
    ExerciseListLoaded = '[API] Exercise List Loaded',
-   RequestTrainingHistory = '[Training] Request Training History',
    TrainingHistoryLoaded = '[API] Training History Loaded',
    SelectExercise = '[Training] Select Exercise',
    DeselectExercise = '[Training] Deselect Exercise',
@@ -26,14 +25,6 @@ export class ExerciseListLoaded implements Action {
    readonly type = TrainingActions.ExerciseListLoaded;
 
    constructor(public payload: Exercise[]) {
-      // console.log(`ACTION: ${this.type}`);
-   }
-}
-
-export class RequestTrainingHistory implements Action {
-   readonly type = TrainingActions.RequestTrainingHistory;
-
-   constructor() {
       // console.log(`ACTION: ${this.type}`);
    }
 }
@@ -97,7 +88,6 @@ export class SaveExerciseError implements Action {
 export type TrainingActionTypes
    = RequestExerciseList
    | ExerciseListLoaded
-   | RequestTrainingHistory
    | TrainingHistoryLoaded
    | SelectExercise
    | DeselectExercise
